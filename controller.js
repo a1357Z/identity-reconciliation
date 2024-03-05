@@ -1,6 +1,5 @@
-const { response } = require("express");
-const { Op } = require("sequelize")
-const {Contact} = require("./db")
+const { Op, Sequelize } = require("sequelize")
+const {Contact, sequelize} = require("./db")
 
 module.exports = async function (req, res) {
     try{
@@ -130,27 +129,47 @@ async function buildResponseForManyContacts(linkedId){
 		}
 	}
 
+    const existingEmails = new Set()
+    const existingPhoneNumbers = new Set()
+
     // find the primary contact
     const primaryContact = await Contact.findOne({ where: {id: linkedId} });
 
-    // find the secondary contacts
-    // TODO: can i use some db operation to only fetch distinct numbers and emails
-    const secondaryContacts = await Contact.findAll({
-        where: {
-            linkedId: linkedId
-        }
-    });
-
-    response.contact.emails.push(primaryContact.dataValues.email)
-    response.contact.phoneNumbers.push(primaryContact.dataValues.phoneNumber)
-
-    // TODO: handle duplicate phone numbers and emails
-    secondaryContacts.forEach(secondaryContact => {
-        response.contact.emails.push(secondaryContact.dataValues.email)
-        response.contact.phoneNumbers.push(secondaryContact.dataValues.phoneNumber)
-        response.contact.secondaryContactIds.push(secondaryContact.dataValues.id)
-    })
+    if(primaryContact.dataValues.email){
+        response.contact.emails.push(primaryContact.dataValues.email)
+        existingEmails.add(primaryContact.dataValues.email)
+    }
     
+    if(primaryContact.dataValues.phoneNumber){
+        response.contact.phoneNumbers.push(primaryContact.dataValues.phoneNumber)
+        existingPhoneNumbers.add(primaryContact.dataValues.phoneNumber)
+    }
+
+    const query = `
+        SELECT email, phoneNumber, id
+        FROM contacts 
+        WHERE  linkedId = :linkedId
+    `; 
+
+    const secondaryContacts = await sequelize.query(query, {
+        replacements: { linkedId },
+        type: sequelize.QueryTypes.SELECT
+    });
+    
+    secondaryContacts.forEach(item => {
+        if(!existingEmails.has(item.email) && item.email){
+            response.contact.emails.push(item.email)
+            existingEmails.add(item.email)
+        }
+
+        if(!existingPhoneNumbers.has(item.phoneNumber) && item.phoneNumber){
+            response.contact.phoneNumbers.push(item.phoneNumber)
+            existingPhoneNumbers.add(item.phoneNumber)
+        }
+
+        response.contact.secondaryContactIds.push(item.id)
+    })
+
     return response
 }
 
