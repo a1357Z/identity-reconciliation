@@ -37,7 +37,10 @@ for every use case we need to return the entire data for the person
         1. a new person is added
 
     if both contact1 and contact2 are present:
-       3. two different existing persons are connected as one
+        both belong to same contact group
+            4. we find an existing contact
+        both belong to different contact group
+            3. two different existing persons are connected as one
 
 
 # use cases in detail:
@@ -50,6 +53,5 @@ for every use case we need to return the entire data for the person
    else use the linkedId of the existing account here as well
 
 3. two different existing persons are connected as one
-    contact1 becomes the primary group. find the linkedId of contact1 (create a function for this)
-    find the linkedId of contact2. find all the contacts with this linkedId and update to linkedId of contact1
-    update linkedId of primary contact in contact2
+    we need to select the group created first as parent group
+    update the linkedId and linkPrecedence of the other group

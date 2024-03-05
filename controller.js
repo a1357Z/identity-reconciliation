@@ -34,21 +34,40 @@ module.exports = async function (req, res) {
             // 1. a new person is added
             return createNewContact({ email, phoneNumber }, res)
         }else if(contact1 && contact2){
+            
+
+            const contact1LinkedId = getLinkedId(contact1)
+            const contact1Parent = await Contact.findOne({ where: {id: contact1LinkedId} });
+            
+            const contact2LinkedId = getLinkedId(contact2);
+            const contact2Parent = await Contact.findOne({ where: {id: contact2LinkedId} });
+
+            // if both contacts belong to same group
+            if(contact1LinkedId === contact2LinkedId){
+                const response = await buildResponseForManyContacts(contact1LinkedId)
+                res.status(200).send(response);
+            }
+
+            // if both contacts belong to different groups
             // 3. two different existing contact groups are connected as one here
             
-            // select contact1 group as parent group
-            const parentLinkedId = getLinkedId(contact1)
+            // we need to select the group created first as parent group
 
-            // update the linkedId for contact2 group
-            const contact2LinkedId = getLinkedId(contact2)
+            let otherParentId = contact2Parent.dataValues.id
+            let eldestParentId = contact1Parent.dataValues.id
+
+            if(contact2Parent.dataValues.createdAt < contact1Parent.dataValues.createdAt){
+                eldestParentId = contact2Parent.dataValues.id
+                otherParentId = contact1Parent.dataValues.id
+            }
             
-            await Contact.update({ linkPrecedence: "secondary", linkedId: parentLinkedId }, {
+            await Contact.update({ linkPrecedence: "secondary", linkedId: eldestParentId }, {
                 where: {
-                    [Op.or]: [{ linkedId: contact2LinkedId }, { id: contact2LinkedId }]
+                    [Op.or]: [{ linkedId: otherParentId }, { id: otherParentId }]
                 }
             });
 
-            const response = await buildResponseForManyContacts(parentLinkedId)
+            const response = await buildResponseForManyContacts(eldestParentId)
             res.status(200).send(response);
         }else{
             // 2. existing person adds a new contact
