@@ -1,9 +1,9 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-// Sequelize configuration
-const sequelize = new Sequelize('bitespeed', 'ajay-yadav-unbxd', 'password123#AB', {
+const sequelize = new Sequelize('ajay-yadav', 'ajay-yadav', 'password123#AB', {
   host: 'localhost',
-  dialect: 'mysql',
+  dialect: 'postgres',
+  port: 5432,
   // Additional options
 });
 

@@ -31,6 +31,9 @@ app.post('/identify', (req, res, next) => {
     if(!email && !phoneNumber){
         return res.status(422).json({ error: 'Invalid Payload' });
     }
+    if(typeof email != "string")return res.status(422).json({ error: 'Invalid Payload Format' });
+    if(typeof phoneNumber != "string")return res.status(422).json({ error: 'Invalid Payload Format' });
+    
     next()
 },require("./controller"))
 

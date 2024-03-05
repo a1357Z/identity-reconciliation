@@ -145,29 +145,20 @@ async function buildResponseForManyContacts(linkedId){
         existingPhoneNumbers.add(primaryContact.dataValues.phoneNumber)
     }
 
-    const query = `
-        SELECT email, phoneNumber, id
-        FROM contacts 
-        WHERE  linkedId = :linkedId
-    `; 
-
-    const secondaryContacts = await sequelize.query(query, {
-        replacements: { linkedId },
-        type: sequelize.QueryTypes.SELECT
-    });
+    const secondaryContacts = await Contact.findAll({ where: {linkedId: linkedId} });
     
     secondaryContacts.forEach(item => {
-        if(!existingEmails.has(item.email) && item.email){
-            response.contact.emails.push(item.email)
-            existingEmails.add(item.email)
+        if(item.dataValues.email && !existingEmails.has(item.dataValues.email)){
+            response.contact.emails.push(item.dataValues.email)
+            existingEmails.add(item.dataValues.email)
         }
 
-        if(!existingPhoneNumbers.has(item.phoneNumber) && item.phoneNumber){
-            response.contact.phoneNumbers.push(item.phoneNumber)
-            existingPhoneNumbers.add(item.phoneNumber)
+        if(item.dataValues.phoneNumber && !existingPhoneNumbers.has(item.dataValues.phoneNumber)){
+            response.contact.phoneNumbers.push(item.dataValues.phoneNumber)
+            existingPhoneNumbers.add(item.dataValues.phoneNumber)
         }
 
-        response.contact.secondaryContactIds.push(item.id)
+        response.contact.secondaryContactIds.push(item.dataValues.id)
     })
 
     return response
