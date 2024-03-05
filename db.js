@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-const sequelize = new Sequelize('ajay-yadav', 'ajay-yadav', 'password123#AB', {
+const sequelize = new Sequelize('ajayyadav', 'ajayyadav', '08qJf4u4N6q08sG3Ui2OY0luvl7261At', {
   host: 'localhost',
   dialect: 'postgres',
   port: 5432,
