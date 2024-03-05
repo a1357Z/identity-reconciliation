@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-const sequelize = new Sequelize('ajayyadav', 'ajayyadav', '08qJf4u4N6q08sG3Ui2OY0luvl7261At', {
-  host: 'dpg-cnjbjj821fec73ah6atg-a',
+const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.USERNAME, process.env.PASSWORD, {
+  host: process.env.DATABASE_HOST,
   dialect: 'postgres',
   port: 5432,
   // Additional options
